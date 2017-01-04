@@ -43,6 +43,11 @@ get_time_diff() ->
   end.
 
 get_time_diff_from_server() ->
+  ServerTime = get_server_time(),
+  LocalTime = get_time(),
+  ServerTime - LocalTime.
+
+get_server_time() ->
   Url = ?TWO_FACTOR_TIME_QUERY,
   Response = httpc:request(post, {Url, [], "application/json", "steam_id=0"}, [], []),
 
@@ -56,8 +61,7 @@ get_time_diff_from_server() ->
   SteamResponse = maps:get(<<"response">>, ResponseObject),
   ServerTimeString = maps:get(<<"server_time">>, SteamResponse),
   ServerTime = list_to_integer(binary_to_list(ServerTimeString)),
-  LocalTime = get_time(),
-  ServerTime - LocalTime.
+  ServerTime.
 
 get_time() ->
   erlang:system_time(1).
