@@ -1,46 +1,42 @@
-%%%-------------------------------------------------------------------
-%%% @author fabsolutely
-%%% @copyright (C) 2016, <COMPANY>
-%%% @doc
-%%%
-%%% @end
-%%% Created : 20. Dec 2016 07:20
-%%%-------------------------------------------------------------------
 -module(steam_guard_code_time_aligner).
 -author("fabsolutely").
--include("steam_guard_code_constants.hrl").
+-include("steam_guard_code_generator.hrl").
 
+-behavior(gen_server).
 
-%% API
--export([start/0, time_aligner_keeper/2, get_time_diff/0, get_steam_time/0, get_time/0]).
+-export([
+  start/0,
+  start_link/0,
+  get_steam_time/0,
+  get_time/0,
+  get_time_diff/0,
+  get_server_time/0
+]).
+
+-export([
+  init/1,
+  handle_call/3,
+  handle_cast/2,
+  handle_info/2,
+  terminate/2,
+  code_change/3
+]).
+
+-record(state, {
+  is_time_aligned = false,
+  aligned_diff = 0
+}).
 
 start() ->
-  Pid = spawn_link(?MODULE, time_aligner_keeper, [0, false]),
-  register(steam_guard_code_time_aligner_keeper_pid, Pid).
+  gen_server:start({local, ?MODULE}, ?MODULE, [], []).
 
-time_aligner_keeper(TimeDiff, IsTimeAligned) ->
-  receive
-    {get_time, Pid} -> case IsTimeAligned of
-                         true -> Pid ! {time_response, TimeDiff},
-                           time_aligner_keeper(TimeDiff, IsTimeAligned);
-                         _ -> ServerTimeDiff = get_time_diff_from_server(),
-                           Pid ! {time_response, ServerTimeDiff},
-                           time_aligner_keeper(ServerTimeDiff, true)
-                       end;
-    _ -> time_aligner_keeper(TimeDiff, IsTimeAligned)
-  end.
-
-get_steam_time() ->
-  Diff = get_time_diff(),
-  LocalTime = get_time(),
-  LocalTime + Diff.
-
+start_link() ->
+  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 get_time_diff() ->
-  steam_guard_code_time_aligner_keeper_pid ! {get_time, self()},
-  receive
-    {time_response, TimeDiff} -> TimeDiff
-  end.
+  gen_server:call(?MODULE, time_diff_q).
+
+get_steam_time() -> gen_server:call(?MODULE, time_q).
 
 get_time_diff_from_server() ->
   ServerTime = get_server_time(),
@@ -63,5 +59,24 @@ get_server_time() ->
   ServerTime = list_to_integer(binary_to_list(ServerTimeString)),
   ServerTime.
 
-get_time() ->
-  erlang:system_time(1).
+get_time() -> erlang:system_time(1).
+
+init([]) ->
+  {ok, #state{}}.
+
+handle_call(time_q, _From, _State) ->
+  AlignedDiff = get_time_diff(),
+  Time = get_time(),
+  {reply, AlignedDiff + Time, #state{is_time_aligned = true, aligned_diff = AlignedDiff}};
+
+handle_call(time_diff_q, _From, #state{is_time_aligned = IsTimeAligned, aligned_diff = AlignedDiff}) ->
+  ResponseTimeDiff = case IsTimeAligned of
+                       false -> get_time_diff_from_server();
+                       _ -> AlignedDiff
+                     end,
+  {reply, ResponseTimeDiff, #state{is_time_aligned = true, aligned_diff = ResponseTimeDiff}}.
+
+handle_cast(_Request, State) -> {noreply, State}.
+handle_info(_Info, State) -> {noreply, State}.
+terminate(_Reason, _State) -> ok.
+code_change(_OldVsn, State, _Extra) -> {ok, State}.

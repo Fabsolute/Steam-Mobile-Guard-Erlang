@@ -6,21 +6,23 @@
 -define(STEAM_GUARD_CODE_TRANSLATION, "23456789BCDFGHJKMNPQRTVWXY").
 
 start() ->
-  ensure_started(crypto),
-  ensure_started(asn1),
-  ensure_started(public_key),
-  ensure_started(ssl),
-  ensure_started(inets),
-  ensure_started(steam_guard_code_generator),
+  start(steam_guard_code_generator),
   steam_guard_code_time_aligner:start().
 
-stop() -> ok.
+start(Application) ->
+  case application:ensure_started(Application) of
+    ok -> io:format("i am ~p and i started ~n", [Application]);
+    _Error -> case application:get_key(Application, applications) of
+                {ok, DependentApplications} ->
+                  io:format("i am ~p and i require ~p ~n", [Application, DependentApplications]),
+                  [start(A) || A <- DependentApplications],
+                  start(Application);
+                X -> io:format("i am ~p and i failed with ~p ~n", [Application, X])
+              end
+  end,
+  ok.
 
-ensure_started(App) ->
-  case application:start(App) of
-    ok -> ok;
-    {error, {already_started, App}} -> ok
-  end.
+stop() -> ok.
 
 %%%% Generate token with steam accounts shared secrets
 generate_token_with_shared_secret(Secret) ->
