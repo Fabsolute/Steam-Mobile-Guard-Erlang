@@ -1,0 +1,23 @@
+%% -*- erlang -*-
+{application, steam_mobile_guard, [
+  {description, "steam_mobile_guard"},
+  {vsn, "0.1"},
+  {modules, [
+    steam_time_aligner
+  ]},
+  {registered, []},
+  {mod, {steam_mobile_guard_app, []}},
+  {env, []},
+  {
+    applications,
+    [
+      kernel,
+      stdlib,
+      crypto,
+      asn1,
+      public_key,
+      ssl,
+      inets
+    ]
+  }
+]}.

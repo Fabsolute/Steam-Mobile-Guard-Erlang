@@ -1,9 +1,0 @@
-%% -*- erlang -*-
-{application, steam_guard_code_generator,
-  [{description, "steam_guard_code_generator"},
-    {vsn, "0.1"},
-    {modules, [steam_guard_code_time_aligner]},
-    {registered, [steam_guard_code_time_aligner_keeper_pid]},
-    {mod, {'steam_guard_code_generator_app', []}},
-    {env, []},
-    {applications, [kernel, stdlib, crypto]}]}.
