@@ -1,4 +1,4 @@
--module(steam_guard_code_generator_sup).
+-module(steam_mobile_guard_sup).
 -behaviour(supervisor).
 
 -export([start_link/0]).

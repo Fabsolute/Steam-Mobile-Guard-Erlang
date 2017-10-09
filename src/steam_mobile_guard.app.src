@@ -1,12 +1,12 @@
 %% -*- erlang -*-
-{application, steam_guard_code_generator, [
-  {description, "steam_guard_code_generator"},
+{application, steam_mobile_guard, [
+  {description, "steam_mobile_guard"},
   {vsn, "0.1"},
   {modules, [
-    steam_guard_code_time_aligner
+    steam_time_aligner
   ]},
   {registered, []},
-  {mod, {steam_guard_code_generator_app, []}},
+  {mod, {steam_mobile_guard_app, []}},
   {env, []},
   {
     applications,
