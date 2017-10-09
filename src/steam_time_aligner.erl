@@ -45,16 +45,9 @@ get_time_diff_from_server() ->
 
 get_server_time() ->
   Url = ?TWO_FACTOR_TIME_QUERY,
-  Response = httpc:request(post, {Url, [], "application/json", "steam_id=0"}, [], []),
 
-  ResponseObject = case Response of
-                     {ok, Result} ->
-                       case Result of
-                         {_Status, _Headers, Body} -> jiffy:decode(Body, [return_maps]);
-                         {_Status, Body} -> jiffy:decode(Body, [return_maps])
-                       end
-                   end,
-  SteamResponse = maps:get(<<"response">>, ResponseObject),
+  Response = steam_http:request(post, {Url, [], "application/json", "steam_id=0"}, [], []),
+  SteamResponse = maps:get(<<"response">>, Response),
   ServerTimeString = maps:get(<<"server_time">>, SteamResponse),
   ServerTime = list_to_integer(binary_to_list(ServerTimeString)),
   ServerTime.
