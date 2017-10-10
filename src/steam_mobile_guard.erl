@@ -7,7 +7,7 @@
 start() ->
   reloader:start(),
   steam_time_aligner:start(),
-  start(steam_guard_code_generator).
+  start(steam_mobile_guard).
 
 start(Application) ->
   case application:ensure_started(Application) of

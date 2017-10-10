@@ -1,5 +1,6 @@
 -module(steam_time_aligner).
 -include("../include/steam_urls.hrl").
+-include("../include/http_response.hrl").
 
 -behavior(gen_server).
 
@@ -46,9 +47,9 @@ get_time_diff_from_server() ->
 get_server_time() ->
   Url = ?TWO_FACTOR_TIME_QUERY,
 
-  Response = steam_http:request(post, {Url, [], "application/json", "steam_id=0"}, [], []),
-  SteamResponse = maps:get(<<"response">>, Response),
-  ServerTimeString = maps:get(<<"server_time">>, SteamResponse),
+  SteamResponse = steam_http:post(Url ++ "?steam_id=0", <<>>, [], []),
+  Response = maps:get(<<"response">>, SteamResponse#http_response.json_body),
+  ServerTimeString = maps:get(<<"server_time">>, Response),
   ServerTime = list_to_integer(binary_to_list(ServerTimeString)),
   ServerTime.
 

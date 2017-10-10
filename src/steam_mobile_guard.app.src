@@ -6,7 +6,6 @@
     steam_time_aligner
   ]},
   {registered, []},
-  {mod, {steam_mobile_guard_app, []}},
   {env, []},
   {
     applications,
@@ -17,7 +16,8 @@
       asn1,
       public_key,
       ssl,
-      inets
+      inets,
+      hackney
     ]
   }
 ]}.

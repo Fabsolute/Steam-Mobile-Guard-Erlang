@@ -1,4 +1,5 @@
 #!/bin/sh
+rm ebin/*
 rebar g-d
 rebar compile
 exec erl \
