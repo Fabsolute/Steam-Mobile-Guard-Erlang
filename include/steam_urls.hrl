@@ -1,5 +1,5 @@
--define(STEAM_API_BASE, "http://api.steampowered.com").
--define(STEAM_COMMUNITY_BASE, "http://steamcommunity.com").
+-define(STEAM_API_BASE, "https://api.steampowered.com").
+-define(STEAM_COMMUNITY_BASE, "https://steamcommunity.com").
 -define(STEAM_API_VERSION, "/v0001").
 -define(MOBILE_AUTH_BASE, ?STEAM_API_BASE ++ "/IMobileAuthService").
 -define(MOBILE_AUTH_GET_WG_TOKEN, ?MOBILE_AUTH_BASE ++ "/GetWGToken" ++ ?STEAM_API_VERSION).

@@ -7,6 +7,8 @@
 start() ->
   reloader:start(),
   steam_time_aligner:start(),
+  steam_cookie:start(),
+  steam_bot:start(),
   start(steam_mobile_guard).
 
 start(Application) ->
