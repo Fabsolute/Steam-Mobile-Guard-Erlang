@@ -1,0 +1,4 @@
+-record('RSAPublicKey', {
+  modulus,
+  publicExponent
+}).

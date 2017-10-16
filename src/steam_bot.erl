@@ -60,7 +60,7 @@ init([]) ->
 
   {ok, #state{}}.
 
-handle_call({login, Username, _Password}, _From, State) ->
+handle_call({login, Username, Password}, _From, State) ->
   RSAPostData = [{<<"username">>, Username}],
   RSAResponse = steam_http:mobile_post(
     ?LOGIN_GET_RSA_KEY,
@@ -69,12 +69,39 @@ handle_call({login, Username, _Password}, _From, State) ->
     steam_cookie:get_headers(Username)
   ),
   RSABody = RSAResponse#http_response.json_body,
-  case maps:get(<<"success">>, RSABody) of
-    false -> throw({error, bad_rsa});
-    _ -> ok
-  end,
-
-  {reply, RSAResponse, State};
+  EncryptedPassword = case maps:get(<<"success">>, RSABody) of
+                        false -> throw({error, bad_rsa});
+                        _ ->
+                          Exponent = maps:get(<<"publickey_exp">>, RSABody),
+                          Modulus = maps:get(<<"publickey_mod">>, RSABody),
+                          base64:encode(steam_util:encrypt_password(Password, Modulus, Exponent))
+                      end,
+  TwoFactorCode = steam_guard_code_generator:generate_token_with_shared_secret("fph9IAv4xmYpP7oG1xni8nXSl1s="),
+  RSATimestamp = maps:get(<<"timestamp">>, RSABody),
+  LoginPostData = [
+    {<<"captchagid">>, <<"-1">>},
+    {<<"captcha_text">>, <<"">>},
+    {<<"emailsteamid">>, <<"">>},
+    {<<"emailauth">>, <<"">>},
+    {<<"remember_login">>, <<"false">>},
+    {<<"oauth_client_id">>, <<"DE45CD61">>},
+    {<<"oauth_scope">>, <<"read_profile write_profile read_client write_client">>},
+    {<<"loginfriendlyname">>, <<"#login_emailauth_friendlyname_mobile">>},
+    {<<"donotcache">>, integer_to_binary(steam_time_aligner:get_local_time())},
+    {<<"username">>, Username},
+    {<<"password">>, EncryptedPassword},
+    {<<"twofactorcode">>, TwoFactorCode},
+    {<<"rsatimestamp">>, RSATimestamp}
+  ],
+  LoginResponse = steam_http:mobile_post(
+    ?LOGIN_DO_LOGIN,
+    LoginPostData,
+    steam_cookie:get_cookies(Username),
+    steam_cookie:get_headers(Username)
+  ),
+  steam_cookie:add_headers(Username, LoginResponse#http_response.headers),
+  steam_cookie:add_cookies(Username, LoginResponse#http_response.cookies),
+  {reply, {rsa, RSAResponse, login, LoginResponse}, State};
 
 handle_call(Request, From, State) ->
   erlang:error(not_implemented).

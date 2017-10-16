@@ -47,7 +47,7 @@ get_time_diff_from_server() ->
 get_server_time() ->
   Url = ?TWO_FACTOR_TIME_QUERY,
 
-  SteamResponse = steam_http:post(Url ++ "?steam_id=0", <<>>, [], []),
+  SteamResponse = steam_http:post(Url, [{<<"steam_id">>, <<"0">>}], [], []),
   Response = maps:get(<<"response">>, SteamResponse#http_response.json_body),
   ServerTimeString = maps:get(<<"server_time">>, Response),
   ServerTime = list_to_integer(binary_to_list(ServerTimeString)),
