@@ -24,7 +24,7 @@ mobile_get(URL, Cookies, Headers) ->
 
 
 mobile_request(URL, Method, Data, Cookies, Headers) ->
-  request(URL, Method, Data, Cookies, Headers, ?MOBILE_LOGIN_OAUTH).
+  request(URL, Method, Data, Cookies, Headers, ?STEAM_COMMUNITY_BASE).
 
 
 request(URL, Method, Data, Cookies, Headers) ->
@@ -43,32 +43,23 @@ request(URL, Method, Data, Cookies, Headers, Referer) ->
          ];
          _ -> []
        end,
-
   Options = [{cookie, Cookies}, {follow_redirect, true}],
-  io:format("trying to connect ~p~n with method ~p~n with content ~p~n with headers ~p~n with cookies ~p~n~n", [
-    URL,
-    Method,
-    QueryData,
-    CustomHeaders,
-    Cookies
-  ]),
 
   {ok, StatusCode, ResponseHeaders, ClientRef} = hackney:request(Method, URL, CustomHeaders, QueryData, Options),
   {ok, RawBody} = hackney:body(ClientRef),
   ResponseCookies = clean_cookies(hackney:cookies(ResponseHeaders)),
   Response = #http_response{status_code = StatusCode, headers = ResponseHeaders, raw_body = RawBody, cookies = ResponseCookies},
 
-  io:format("response is ~p ~n", [Response]),
-
-  try jiffy:decode(RawBody, [return_maps]) of
-    Body -> Response#http_response{json_body = Body}
-  catch
-    _ -> Response
-  end.
-
+  Output = try jiffy:decode(RawBody, [return_maps]) of
+             Body -> Response#http_response{json_body = Body}
+           catch
+             _ -> Response
+           end,
+  io:format("uri ~p ~n response ~p~n", [URL, Output#http_response.raw_body]),
+  Output.
 
 post(URL, Data) ->
-  post(URL, Data, [], []).
+post(URL, Data, [], []).
 
 post(URL, Data, Cookies, Headers) ->
   post(URL, Data, Cookies, Headers, null).

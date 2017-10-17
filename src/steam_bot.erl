@@ -93,12 +93,12 @@ handle_call({login, Username, Password}, _From, State) ->
     {<<"remember_login">>, <<"false">>},
     {<<"oauth_client_id">>, <<"DE45CD61">>},
     {<<"oauth_scope">>, <<"read_profile write_profile read_client write_client">>},
-    {<<"donotcache">>, integer_to_binary(steam_time_aligner:get_local_time())}
+    {<<"donotcache">>, integer_to_binary(steam_time_aligner:get_local_time() * 1000)}
   ],
   LoginResponse = steam_http:mobile_post(
     ?LOGIN_DO_LOGIN,
     LoginPostData,
-    steam_cookie:get_cookies(Username),
+   [],
     steam_cookie:get_headers(Username)
   ),
 
