@@ -35,15 +35,15 @@ request(URL, Method, Data, Cookies, Headers, null) ->
 request(URL, Method, Data, Cookies, Headers, Referer) ->
   QueryData = hackney_url:qs(Data),
   CustomHeaders = Headers ++ [
-    {<<"Referer">>, list_to_binary(Referer)}
+    {<<"Referrer">>, list_to_binary(Referer)}
   ] ++ case Method of
          post -> [
-           {<<"Content-Type">>, <<"application/x-www-form-urlencoded; charset=UTF-8">>},
+           {<<"Content-Type">>, <<"application/x-www-form-urlencoded">>},
            {<<"Content-Length">>, size(QueryData)}
          ];
          _ -> []
        end,
-  Options = [{cookie, Cookies}, {follow_redirect, true}],
+  Options = [{cookie, Cookies}],
 
   {ok, StatusCode, ResponseHeaders, ClientRef} = hackney:request(Method, URL, CustomHeaders, QueryData, Options),
   {ok, RawBody} = hackney:body(ClientRef),
@@ -55,11 +55,10 @@ request(URL, Method, Data, Cookies, Headers, Referer) ->
            catch
              _ -> Response
            end,
-  io:format("uri ~p ~n response ~p~n", [URL, Output#http_response.raw_body]),
   Output.
 
 post(URL, Data) ->
-post(URL, Data, [], []).
+  post(URL, Data, [], []).
 
 post(URL, Data, Cookies, Headers) ->
   post(URL, Data, Cookies, Headers, null).

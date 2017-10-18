@@ -65,7 +65,7 @@ handle_call({login, Username, Password}, _From, State) ->
   RSAResponse = steam_http:mobile_post(
     ?LOGIN_GET_RSA_KEY,
     RSAPostData,
-    steam_cookie:get_cookies(Username),
+    steam_cookie:get_cookies(),
     steam_cookie:get_headers(Username)
   ),
   RSABody = RSAResponse#http_response.json_body,
@@ -77,7 +77,7 @@ handle_call({login, Username, Password}, _From, State) ->
         Modulus = maps:get(<<"publickey_mod">>, RSABody),
         base64:encode(steam_util:encrypt_password(Password, Modulus, Exponent))
     end,
-  steam_cookie:add_cookies(Username, RSAResponse#http_response.cookies),
+  steam_cookie:add_cookies(RSAResponse#http_response.cookies),
   TwoFactorCode = steam_guard_code_generator:generate_token_with_shared_secret("XU/6LNWNIQOt9venDFEU7jj52uE="),
   RSATimestamp = maps:get(<<"timestamp">>, RSABody),
   LoginPostData = [
@@ -98,7 +98,7 @@ handle_call({login, Username, Password}, _From, State) ->
   LoginResponse = steam_http:mobile_post(
     ?LOGIN_DO_LOGIN,
     LoginPostData,
-   [],
+    steam_cookie:get_cookies(),
     steam_cookie:get_headers(Username)
   ),
 

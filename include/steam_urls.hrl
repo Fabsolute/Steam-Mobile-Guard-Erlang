@@ -9,6 +9,6 @@
 -define(LOGIN_BASE, ?STEAM_COMMUNITY_BASE ++ "/login").
 -define(LOGIN_OAUTH, ?LOGIN_BASE ++ ?OAUTH_PARAMETERS).
 -define(LOGIN_GET_RSA_KEY, ?LOGIN_BASE ++ "/getrsakey").
--define(LOGIN_DO_LOGIN, ?LOGIN_BASE ++ "/dologin").
+-define(LOGIN_DO_LOGIN, ?LOGIN_BASE ++ "/dologin/").
 -define(MOBILE_LOGIN_BASE, ?STEAM_COMMUNITY_BASE ++ "/mobilelogin").
 -define(MOBILE_LOGIN_OAUTH, ?MOBILE_LOGIN_BASE ++ ?OAUTH_PARAMETERS).
